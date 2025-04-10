@@ -22,10 +22,12 @@ runs:
           fileName: ${{ env.archive-file }}
       
       - name: "website -- extract the archive"
+        shell: bash
         run: |
           tar -xvf ${{ env.archive-file }}
 
       - name: "metadata -- copy metada to update page"
+        shell: bash
         run: |
           rm -r ./gh-pages/doc
           cp -r ${{ env.revision }}/doc/ ./gh-pages/doc/
@@ -34,6 +36,7 @@ runs:
           rm -v ./gh-pages/doc/.gitignore
 
       - name: "gap -- run update.g"
+        shell: bash
         working-directory: ./gh-pages
         run: |
           gap update.g
