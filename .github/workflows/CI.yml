@@ -1,0 +1,31 @@
+name: CI
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: "Test the update-gh-pages action"
+    runs-on: ubuntu-latest
+    steps:
+      # the order of the checkout actions is important because all contents of
+      # the target folder of the checkout action is removed
+      - name: "Clone the Example package"
+        uses: actions/checkout@v4
+        with:
+          repository: stertooy/TwistedConjugacy
+
+      - name: "Check out this repository"
+        uses: actions/checkout@v4
+        with:
+          path: .this-action/
+
+      - name: "Setup GAP"
+        uses: gap-actions/setup-gap@v2
+
+      - name: "Make a release for Example"
+        uses: ./.this-action/
+        with:
+          dry-run: true
+          repository: stertooy/TwistedConjugacy

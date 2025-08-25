@@ -1,14 +1,22 @@
 name: 'Update GitHub Pages'
 description: 'Update the gh-pages branch of a GAP package'
 inputs:
+  dry-run:
+    description: "Set to true to not push the release to GitHub"
+    required: false
+    default: "false"
   version:
-    description: 'the version of the package from which to update the website (if empty, use latest)'
+    description: "The version of the package from which to update the website (if empty, use latest)"
     required: false
-    default: ''
+    default: ""
   clean:
-    description: 'use a fresh copy of the GithubPagesForGAP website - this will undo any modifications made'
+    description: "Use a fresh copy of the GithubPagesForGAP website - this will undo any modifications made"
     required: false
-    default: 'true'
+    default: "true"
+  repository:
+    description: "The repository to update"
+    required: false
+    default: "${{ github.repository }}"
 
 runs:
   using: "composite"
@@ -46,40 +54,70 @@ runs:
           git add .
           git commit -m "Update to newest version of GitHubPagesForGap"
 
-      - name: "Get the release"
+      - name: "Get package-info.json from the release"
         shell: bash
+        working-directory: ${{ runner.temp }}
         run: |
           if [[ -z "${{ inputs.version }}" ]]; then
-            wget -q https://github.com/${{ github.repository }}/releases/latest/download/package-info.json
+            echo "Downloading package-info.json from latest release"
+            wget https://github.com/${{ inputs.repository }}/releases/latest/download/package-info.json
           else
             VERSION=${{ inputs.version }}
-            VERSION=v${VERSION#v}
-            wget -q https://github.com/${{ github.repository }}/releases/download/$VERSION/package-info.json
+            VERSION=${VERSION#v}
+            echo "Downloading package-info.json from $VERSION release"
+            wget https://github.com/${{ inputs.repository }}/releases/download/v$VERSION/package-info.json
           fi
           ARCHIVE_URL=$(cat package-info.json | jq -r '.ArchiveURL')
           ARCHIVE_FORMAT=$(cat package-info.json | jq -r '.ArchiveFormats' | tr "," " " | awk '{print $1}')
+          README_URL=$(cat package-info.json | jq -r '.README_URL')
+          echo "ARCHIVE=$ARCHIVE_URL$ARCHIVE_FORMAT" >> "$GITHUB_ENV"
+          echo "README=$(basename $README_URL)" >> "$GITHUB_ENV"
+          echo "PKGNAME=$(cat package-info.json | jq -r '.PackageName')" >> "$GITHUB_ENV"
+          echo "VERSION=$(cat package-info.json | jq -r '.Version')" >> "$GITHUB_ENV"
+
+      - name: "Get package from the release"
+        shell: bash
+        run: |
+          mkdir -p $RUNNER_TEMP/pkg-release
+          TMP_DIR=$RUNNER_TEMP/pkg-release
+          echo "TMP_DIR=$TMP_DIR" >> "$GITHUB_ENV"
           sudo apt-get install --no-install-recommends libarchive-tools -y
-          mkdir -p tmp-pkg-copy
-          wget -qO- $ARCHIVE_URL$ARCHIVE_FORMAT | bsdtar xf - --strip-components=1 -C tmp-pkg-copy
+          wget -O - $ARCHIVE | bsdtar xf - --strip-components=1 -C $TMP_DIR
 
       - name: "Copy files from the release"
         shell: bash
         working-directory: gh-pages
         run: |
-          cp -f ../tmp-pkg-copy/PackageInfo.g .
-          cp -f ../tmp-pkg-copy/README* .
-          cp -f ../tmp-pkg-copy/doc/*.{css,html,js,txt} doc/
+          cp -f $TMP_DIR/PackageInfo.g .
+          cp -f $TMP_DIR/$README .
+          rm -rf doc/ htm/
+          # TODO Should we really copy .txt files? This will also copy the txt files used by GAP which are unreadable...
+          if [ -f "$TMP_DIR/doc/chap0.html" ] ; then
+            mkdir -p doc
+            shopt -s nullglob
+            cp -f $TMP_DIR/doc/*.{css,html,jpg,js,png,txt} doc/
+          fi
+          if [ -d "$TMP_DIR/htm" ] ; then
+              cp -r "$TMP_DIR/htm" .
+          fi
+          if [ -d "$TMP_DIR/doc/htm" ] ; then
+              mkdir -p doc
+              cp -r "$TMP_DIR/doc/htm" doc/
+          fi
           
       - name: "Update links in docs"
         shell: bash
         working-directory: gh-pages/doc
         run: |
-          for f in ./*.htm* ; do
-            sed -E \
+          # Adjust links to the GAP manuals and to the GAPDoc manuals.
+          # Since this action is designed to run on ubuntu-latest, we can use sed -i
+          shopt -s globstar
+          # TODO: improve these substitutions? E.g. do not replace when href starts with "http"?
+          for f in **/*.htm* ; do
+            sed -Ei \
               -e 's;href="[^"]*/doc/([^/"]+)/chap;href="https://docs.gap-system.org/doc/\L\1/chap;g' \
               -e 's;href="[^"]*/\.?pkg/([^/"]+)(-[^/"]+)?/doc/chap;href="https://docs.gap-system.org/pkg/\L\1/doc/chap;g' \
-              "$f" > "$f.bak"
-            mv "$f.bak" "$f"
+              "$f"
           done
 
       - name: "Run update script"
@@ -92,7 +130,23 @@ runs:
       - name: "Update the gh-pages branch"
         shell: bash
         working-directory: gh-pages
+        if: ${{ inputs.dry-run == 'false' }}
         run: |
-          git add PackageInfo.g README* doc/ _data/package.yml
-          git commit --allow-empty -m "Update GitHub Pages"
+          git add -A
+          git commit --allow-empty -m "Update website for $PKGNAME $VERSION"
           git push --set-upstream origin gh-pages
+
+      - name: "Build the website"
+        if: ${{ inputs.dry-run == 'true' }}
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: gh-pages
+          destination: output
+
+      - name: "Upload the release"
+        uses: actions/upload-artifact@v4
+        if: ${{ inputs.dry-run == 'true' }}
+        with:
+          name: "Website_for_${{ env.PKGNAME }}_${{ env.VERSION }}"
+          path: output
+          if-no-files-found: error
