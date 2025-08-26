@@ -91,11 +91,10 @@ runs:
           cp -f $TMP_DIR/PackageInfo.g .
           cp -f $TMP_DIR/$README .
           rm -rf doc/ htm/
-          # TODO Should we really copy .txt files? This will also copy the txt files used by GAP which are unreadable...
           if [ -f "$TMP_DIR/doc/chap0.html" ] ; then
             mkdir -p doc
             shopt -s nullglob
-            cp -f $TMP_DIR/doc/*.{css,html,jpg,js,png,txt} doc/
+            cp -f $TMP_DIR/doc/*.{css,html,jpg,js,png} doc/
           fi
           if [ -d "$TMP_DIR/htm" ] ; then
               cp -r "$TMP_DIR/htm" .
