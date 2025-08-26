@@ -40,7 +40,7 @@ runs:
           fi
           git worktree add gh-pages gh-pages
 
-      - name: "Setup GitHubPagesForGap"
+      - name: "Setup GitHubPagesForGAP"
         shell: bash
         if: ${{ inputs.clean == 'true' }}
         working-directory: gh-pages
@@ -48,11 +48,11 @@ runs:
           # Remove everything
           git rm -r --cached --ignore-unmatch *
           git clean -f *
-          # Download GitHubPagesForGap and extract
+          # Download GitHubPagesForGAP and extract
           wget -qO- https://github.com/gap-system/GitHubPagesForGAP/archive/refs/heads/gh-pages.tar.gz | tar xzf - --strip-components=1
           # Add GitHubPagesForGap to git
           git add .
-          git commit -m "Update to newest version of GitHubPagesForGap"
+          git commit -m "Update to newest version of GitHubPagesForGAP"
 
       - name: "Get package-info.json from the release"
         shell: bash
