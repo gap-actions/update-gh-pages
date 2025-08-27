@@ -8,13 +8,19 @@ jobs:
   test:
     name: "Test the update-gh-pages action"
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package: "gap-actions/ActionTestGAPDocPackage"
+          - package: "gap-actions/ActionTestOldDocPackage"
     steps:
       # the order of the checkout actions is important because all contents of
       # the target folder of the checkout action is removed
-      - name: "Clone the Example package"
+      - name: "Clone the package"
         uses: actions/checkout@v5
         with:
-          repository: stertooy/TwistedConjugacy
+          repository: ${{ matrix.package }}
 
       - name: "Check out this repository"
         uses: actions/checkout@v5
@@ -23,9 +29,9 @@ jobs:
 
       - name: "Setup GAP"
         uses: gap-actions/setup-gap@v2
-
-      - name: "Make a release for Example"
+          
+      - name: "Build the GitHub pages"
         uses: ./.this-action/
         with:
           dry-run: true
-          repository: stertooy/TwistedConjugacy
+          repository: ${{ matrix.package }}
