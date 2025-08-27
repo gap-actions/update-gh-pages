@@ -98,27 +98,30 @@ runs:
             cp -f $TMP_DIR/doc/*.{css,html,jpg,js,png} doc/
           fi
           if [ -d "$TMP_DIR/htm" ] ; then
-              cp -r "$TMP_DIR/htm" .
+            cp -r "$TMP_DIR/htm" .
           fi
           if [ -d "$TMP_DIR/doc/htm" ] ; then
-              mkdir -p doc
-              cp -r "$TMP_DIR/doc/htm" doc/
+            mkdir -p doc
+            cp -r "$TMP_DIR/doc/htm" doc/
           fi
           
       - name: "Update links in docs"
         shell: bash
-        working-directory: gh-pages/doc
+        working-directory: gh-pages
         run: |
-          # Adjust links to the GAP manuals and to the GAPDoc manuals.
-          # Since this action is designed to run on ubuntu-latest, we can use sed -i
-          shopt -s globstar
-          # TODO: improve these substitutions, should the need arise. E.g. do not replace when href starts with "http"?
-          for f in **/*.htm* ; do
-            sed -Ei \
-              -e 's;href="[^"]*/doc/([^/"]+)/chap;href="https://docs.gap-system.org/doc/\L\1/chap;g' \
-              -e 's;href="[^"]*/\.?pkg/([^/"]+)(-[^/"]+)?/doc/chap;href="https://docs.gap-system.org/pkg/\L\1/doc/chap;g' \
-              "$f"
-          done
+          if [ -d "doc" ] ; then
+            cd doc
+            # Adjust links to the GAP manuals and to the GAPDoc manuals.
+            # Since this action is designed to run on ubuntu-latest, we can use sed -i
+            shopt -s globstar
+            # TODO: improve these substitutions, should the need arise. E.g. do not replace when href starts with "http"?
+            for f in **/*.htm* ; do
+              sed -Ei \
+                -e 's;href="[^"]*/doc/([^/"]+)/chap;href="https://docs.gap-system.org/doc/\L\1/chap;g' \
+                -e 's;href="[^"]*/\.?pkg/([^/"]+)(-[^/"]+)?/doc/chap;href="https://docs.gap-system.org/pkg/\L\1/doc/chap;g' \
+                "$f"
+            done
+          fi
 
       - name: "Run update script"
         shell: bash
