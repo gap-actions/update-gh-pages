@@ -100,6 +100,7 @@ runs:
           if [ -d "$TMP_DIR/htm" ] ; then
             cp -r "$TMP_DIR/htm" .
           fi
+          # The following check is for the sonata package
           if [ -d "$TMP_DIR/doc/htm" ] ; then
             mkdir -p doc
             cp -r "$TMP_DIR/doc/htm" doc/
