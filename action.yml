@@ -70,10 +70,10 @@ runs:
           ARCHIVE_URL=$(cat package-info.json | jq -r '.ArchiveURL')
           ARCHIVE_FORMAT=$(cat package-info.json | jq -r '.ArchiveFormats' | tr "," " " | awk '{print $1}')
           README_URL=$(cat package-info.json | jq -r '.README_URL')
-          echo "ARCHIVE=$ARCHIVE_URL$ARCHIVE_FORMAT" >> "$GITHUB_ENV"
-          echo "README=$(basename $README_URL)" >> "$GITHUB_ENV"
-          echo "PKGNAME=$(cat package-info.json | jq -r '.PackageName')" >> "$GITHUB_ENV"
-          echo "VERSION=$(cat package-info.json | jq -r '.Version')" >> "$GITHUB_ENV"
+          echo "ARCHIVE=$ARCHIVE_URL$ARCHIVE_FORMAT" | tee -a "$GITHUB_ENV"
+          echo "README=$(basename $README_URL)" | tee -a "$GITHUB_ENV"
+          echo "PKGNAME=$(cat package-info.json | jq -r '.PackageName')" | tee -a "$GITHUB_ENV"
+          echo "VERSION=$(cat package-info.json | jq -r '.Version')" | tee -a "$GITHUB_ENV"
 
       - name: "Get package from the release"
         shell: bash
