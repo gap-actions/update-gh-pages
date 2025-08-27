@@ -20,6 +20,9 @@ All of the following inputs are optional.
   - Set to `false` to only update the information on the website and not the website code itself.
     This can be useful if you have made modifications to it.
   - default: `true`
+- `dry-run`:
+  - Set to `true` to create an archive containing the website instead of pushing to the `gh-pages` branch.
+  - default: `false`
 
 ### Example
 
@@ -60,6 +63,11 @@ on:
         required: false
         type: boolean
         default: true
+      dry-run:
+        description: 'Set to true to create an archive containing the website instead of pushing to the gh-pages branch'
+        required: false
+        type: boolean
+        default: false
 
 permissions: write-all
 
@@ -75,6 +83,7 @@ jobs:
         with:
           version: ${{ inputs.version }}
           clean: ${{ inputs.clean }}
+          dry-run: ${{ inputs.dry-run }}
 ```
 
 ## Contact
