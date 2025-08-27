@@ -81,6 +81,7 @@ runs:
           mkdir -p $RUNNER_TEMP/pkg-release
           TMP_DIR=$RUNNER_TEMP/pkg-release
           echo "TMP_DIR=$TMP_DIR" >> "$GITHUB_ENV"
+          # We use bsdtar here as it can handle all three supported archive formats, unlike tar/unzip
           sudo apt-get install --no-install-recommends libarchive-tools -y
           wget -O - $ARCHIVE | bsdtar xf - --strip-components=1 -C $TMP_DIR
 
@@ -111,7 +112,7 @@ runs:
           # Adjust links to the GAP manuals and to the GAPDoc manuals.
           # Since this action is designed to run on ubuntu-latest, we can use sed -i
           shopt -s globstar
-          # TODO: improve these substitutions? E.g. do not replace when href starts with "http"?
+          # TODO: improve these substitutions, should the need arise. E.g. do not replace when href starts with "http"?
           for f in **/*.htm* ; do
             sed -Ei \
               -e 's;href="[^"]*/doc/([^/"]+)/chap;href="https://docs.gap-system.org/doc/\L\1/chap;g' \
