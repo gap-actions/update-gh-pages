@@ -70,8 +70,10 @@ runs:
           ARCHIVE_URL=$(cat package-info.json | jq -r '.ArchiveURL')
           ARCHIVE_FORMAT=$(cat package-info.json | jq -r '.ArchiveFormats' | tr "," " " | awk '{print $1}')
           README_URL=$(cat package-info.json | jq -r '.README_URL')
+          CHANGES_URL=$(cat package-info.json | jq -r '.CHANGES_URL')
           echo "ARCHIVE=$ARCHIVE_URL$ARCHIVE_FORMAT" | tee -a "$GITHUB_ENV"
           echo "README=$(basename $README_URL)" | tee -a "$GITHUB_ENV"
+          echo "CHANGES=$(basename $CHANGES_URL)" | tee -a "$GITHUB_ENV"
           echo "PKGNAME=$(cat package-info.json | jq -r '.PackageName')" | tee -a "$GITHUB_ENV"
           echo "VERSION=$(cat package-info.json | jq -r '.Version')" | tee -a "$GITHUB_ENV"
 
@@ -91,6 +93,9 @@ runs:
         run: |
           cp -f $TMP_DIR/PackageInfo.g .
           cp -f $TMP_DIR/$README .
+          if [[ $CHANGES != 'null' ]]; then
+            cp -f $TMP_DIR/$CHANGES .
+          fi
           rm -rf doc/ htm/
           if [ -f "$TMP_DIR/doc/chap0.html" ] ; then
             mkdir -p doc
