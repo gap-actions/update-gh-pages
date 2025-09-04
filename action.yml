@@ -17,6 +17,10 @@ inputs:
     description: "The repository to update"
     required: false
     default: "${{ github.repository }}"
+  extra-files:
+    description: "A comma-separated list of colon-separated pairs of files and/or directories to be copied from the package to the gh-pages branch (relative to the root directory in both cases), e.g. 'd1/f1:D1/F1,d2/:D2/D3/' copies the file d1/f1 to D1/F2 in gh-pages, and copies the directory d2/ to D2/D3/ in gh-pages."
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -105,6 +109,30 @@ runs:
             mkdir -p doc
             cp -r "$TMP_DIR/doc/htm" doc/
           fi
+
+      - name: "Copy extra files from the release"
+        shell: bash 
+        working-directory: gh-pages
+        if: ${{ inputs.extra-files != '' }}
+        run: |
+          for PAIR in $(echo "${{ inputs.extra-files }}" | tr "," "\n"); do
+
+            SRC=$(echo  ${PAIR} | cut -d':' -f1)
+            DEST=$(echo ${PAIR} | cut -d':' -f2)
+
+            if [ -d "${TMP_DIR}/${SRC}" ] ; then
+              echo "Copying directory ${TMP_DIR}/${SRC} to ./$DEST"
+              mkdir -p $(dirname "${DEST}")
+              cp -r ${TMP_DIR}/${SRC} ./${DEST}
+            elif [ -f "${TMP_DIR}/${SRC}" ] ; then
+              echo "Copying file ${TMP_DIR}/${SRC} to ./${DEST}"
+              mkdir -p $(dirname "${DEST}")
+              cp -f ${TMP_DIR}/${SRC} ./${DEST}
+            else
+              echo "File/directory ${TMP_DIR}/${SRC} not found"
+              exit 1
+            fi
+          done
           
       - name: "Update links in docs"
         shell: bash
