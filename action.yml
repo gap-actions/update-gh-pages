@@ -117,17 +117,20 @@ runs:
         run: |
           for PAIR in $(echo "${{ inputs.extra-files }}" | tr "," "\n"); do
 
-            SRC=$(echo  ${PAIR} | cut -d':' -f1)
-            DEST=$(echo ${PAIR} | cut -d':' -f2)
+            SRC="$(echo ${PAIR} | cut -d':' -f1)"
+            DST="$(echo ${PAIR} | cut -d':' -f2)"
+            if [ "${DST}" == "" ]; then
+              DST="${SRC}"
+            fi
 
             if [ -d "${TMP_DIR}/${SRC}" ] ; then
-              echo "Copying directory ${TMP_DIR}/${SRC} to ./$DEST"
-              mkdir -p $(dirname "${DEST}")
-              cp -r ${TMP_DIR}/${SRC} ./${DEST}
+              echo "Copying directory ${TMP_DIR}/${SRC} to ./$DST"
+              mkdir -p "$(dirname "${DST}")"
+              cp -R "${TMP_DIR}/${SRC}" "./${DST}"
             elif [ -f "${TMP_DIR}/${SRC}" ] ; then
-              echo "Copying file ${TMP_DIR}/${SRC} to ./${DEST}"
-              mkdir -p $(dirname "${DEST}")
-              cp -f ${TMP_DIR}/${SRC} ./${DEST}
+              echo "Copying file ${TMP_DIR}/${SRC} to ./${DST}"
+              mkdir -p "$(dirname "${DST}")"
+              cp -f "${TMP_DIR}/${SRC}" "./${DST}"
             else
               echo "File/directory ${TMP_DIR}/${SRC} not found"
               exit 1

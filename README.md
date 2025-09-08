@@ -23,6 +23,11 @@ All of the following inputs are optional.
 - `dry-run`:
   - Set to `true` to create an archive containing the website instead of pushing to the `gh-pages` branch.
   - default: `false`
+- `extra-files`:
+  - Set to a non-empty string to specify files and directories to copy from the package repository to the website.
+  - The string should be comma-separated list of colon-separated pairs of files and/or directories of the form `source:destination` to be copied from the package to the `gh-pages` branch (relative to the root directory, in both cases).
+    - For example, setting the `extra-files` option to `d1/f1:D1/F1,d2:D2/D3` will copy the file `d1/f1` and the directory `d2`, respectively, from the package repository to the file `D1/F2` and to the directory `D2/D3/` of the `gh-pages` branch, creating new directories as necessary.
+    - For example, setting the `extra-files` option to `CHANGES.md,help/README-extra.md` will copy the files `CHANGES.md` and `help/README-extra.md` from the package repository to the `gh-pages` branch with the same names and path structures.
 
 ### Example
 
@@ -68,6 +73,11 @@ on:
         required: false
         type: boolean
         default: false
+      extra-files:
+        description: 'A comma-separated list of colon-separated pairs of files and/or directories to be copied from the package to the gh-pages branch'
+        required: false
+        type: string
+        default: ''
 
 permissions: write-all
 

@@ -38,3 +38,4 @@ jobs:
         with:
           dry-run: true
           repository: ${{ matrix.package }}
+          extra-files: "CHANGES.md:copied_files/CHANGELOG.md,tst/:copied_files/test_files,tst,CHANGES.md"
