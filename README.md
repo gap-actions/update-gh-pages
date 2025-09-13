@@ -3,6 +3,11 @@
 This GitHub action updates (or creates) the `gh-pages` branch of a GAP package using
 [GitHubPagesForGAP](https://github.com/gap-system/GitHubPagesForGAP).
 
+> [!CAUTION]
+> By default this action regenerates the `gh-pages` branch of your repository
+> from scratch. If you made custom modifications to that branch, you need to
+> disable this behavior by setting the `clean` input to `false`.
+
 ## Usage
 
 The action `update-gh-pages` has to be called by the workflow of a GAP
