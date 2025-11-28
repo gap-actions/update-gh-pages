@@ -40,8 +40,17 @@ runs:
         validate_boolean "${{ inputs.dry-run }}" dry-run
         validate_boolean "${{ inputs.clean }}" clean
 
+    # We explicitly do a fresh checkout so we don't rely on prevous workflow steps
+    # Until https://github.com/actions/checkout/issues/2318 is fixed, stick to v5
+    - name: "Checkout"
+      uses: actions/checkout@v5
+      with:
+        path: gh-pages-tmpdir
+        repository: ${{ inputs.repository }}
+
     - name: "Setup git"
       shell: bash
+      working-directory: gh-pages-tmpdir
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
@@ -49,6 +58,7 @@ runs:
 
     - name: "Create gh-pages worktree"
       shell: bash
+      working-directory: gh-pages-tmpdir
       run: |
         if [[ -z $(git ls-remote --heads origin gh-pages) ]]; then
           echo "::warning::No existing 'gh-pages' branch was found, so it was created. You will still need to change the Pages settings of your repository."
@@ -62,7 +72,7 @@ runs:
     - name: "Setup GitHubPagesForGAP"
       shell: bash
       if: ${{ inputs.clean == 'true' }}
-      working-directory: gh-pages
+      working-directory: gh-pages-tmpdir/gh-pages
       run: |
         # Remove everything
         git rm -r --cached --ignore-unmatch *
@@ -106,7 +116,7 @@ runs:
 
     - name: "Copy files from the release"
       shell: bash
-      working-directory: gh-pages
+      working-directory: gh-pages-tmpdir/gh-pages
       run: |
         cp -f $TMP_DIR/PackageInfo.g .
         cp -f $TMP_DIR/$README .
@@ -127,7 +137,7 @@ runs:
 
     - name: "Copy extra files from the release"
       shell: bash 
-      working-directory: gh-pages
+      working-directory: gh-pages-tmpdir/gh-pages
       if: ${{ inputs.extra-files != '' }}
       run: |
         for PAIR in $(echo "${{ inputs.extra-files }}" | tr "," "\n"); do
@@ -154,7 +164,7 @@ runs:
 
     - name: "Update links in docs"
       shell: bash
-      working-directory: gh-pages
+      working-directory: gh-pages-tmpdir/gh-pages
       run: |
         if [ -d "doc" ] ; then
           cd doc
@@ -172,14 +182,14 @@ runs:
 
     - name: "Run update script"
       shell: bash
-      working-directory: gh-pages
+      working-directory: gh-pages-tmpdir/gh-pages
       run: |
         GAPROOT=${GAPROOT-$HOME/gap}
         $GAPROOT/gap update.g
 
     - name: "Update the gh-pages branch"
       shell: bash
-      working-directory: gh-pages
+      working-directory: gh-pages-tmpdir/gh-pages
       if: ${{ inputs.dry-run == 'false' }}
       run: |
         git add -A
@@ -190,7 +200,7 @@ runs:
       if: ${{ inputs.dry-run == 'true' }}
       uses: actions/jekyll-build-pages@v1
       with:
-        source: gh-pages
+        source: gh-pages-tmpdir/gh-pages
         destination: output
 
     - name: "Upload the release"

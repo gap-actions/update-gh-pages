@@ -52,8 +52,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
-      - uses: gap-actions/setup-gap@v2
+      - uses: actions/checkout@v6
+      - uses: gap-actions/setup-gap@v3
       - uses: gap-actions/update-gh-pages@v1
 ```
 
@@ -92,8 +92,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
-      - uses: gap-actions/setup-gap@v2
+      - uses: actions/checkout@v6
+      - uses: gap-actions/setup-gap@v3
       - uses: gap-actions/update-gh-pages@v1
         with:
           version: ${{ inputs.version }}

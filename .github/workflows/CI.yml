@@ -21,17 +21,17 @@ jobs:
       # the order of the checkout actions is important because all contents of
       # the target folder of the checkout action is removed
       - name: "Clone the package"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: ${{ matrix.package }}
 
       - name: "Check out this repository"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: .this-action/
 
       - name: "Setup GAP"
-        uses: gap-actions/setup-gap@v2
+        uses: gap-actions/setup-gap@v3
           
       - name: "Build the GitHub pages"
         uses: ./.this-action/
