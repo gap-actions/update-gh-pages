@@ -41,9 +41,8 @@ runs:
         validate_boolean "${{ inputs.clean }}" clean
 
     # We explicitly do a fresh checkout so we don't rely on prevous workflow steps
-    # Until https://github.com/actions/checkout/issues/2318 is fixed, stick to v5
     - name: "Checkout"
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         path: gh-pages-tmpdir
         repository: ${{ inputs.repository }}
@@ -204,7 +203,7 @@ runs:
         destination: output
 
     - name: "Upload the release"
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v7
       if: ${{ inputs.dry-run == 'true' }}
       with:
         name: "Website_for_${{ env.PKGNAME }}_${{ env.VERSION }}"
