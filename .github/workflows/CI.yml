@@ -21,12 +21,12 @@ jobs:
       # the order of the checkout actions is important because all contents of
       # the target folder of the checkout action is removed
       - name: "Clone the package"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: ${{ matrix.package }}
 
       - name: "Check out this repository"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: .this-action/
 
