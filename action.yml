@@ -42,7 +42,7 @@ runs:
 
     # We explicitly do a fresh checkout so we don't rely on prevous workflow steps
     - name: "Checkout"
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         path: gh-pages-tmpdir
         repository: ${{ inputs.repository }}
