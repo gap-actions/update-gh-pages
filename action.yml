@@ -80,7 +80,7 @@ runs:
         wget -qO- https://github.com/gap-system/GitHubPagesForGAP/archive/refs/heads/gh-pages.tar.gz | tar xzf - --strip-components=1
         # Add GitHubPagesForGap to git
         git add .
-        git commit -m "Update to newest version of GitHubPagesForGAP"
+        git commit --allow-empty -m "Update to newest version of GitHubPagesForGAP"
 
     - name: "Get package-info.json from the release"
       shell: bash
